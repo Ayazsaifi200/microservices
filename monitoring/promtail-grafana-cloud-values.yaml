@@ -1,0 +1,50 @@
+# Promtail configuration for Grafana Cloud Loki
+config:
+  clients:
+  # UPDATE: Get Loki URL from your Grafana Cloud datasources
+  # Example: https://logs-prod-XXX.grafana.net/loki/api/v1/push
+  - url: https://logs-prod-XXX.grafana.net/loki/api/v1/push
+    basic_auth:
+      username: YOUR_LOKI_USER_ID
+      password: YOUR_GRAFANA_CLOUD_ACCESS_TOKEN
+    external_labels:
+      cluster: microservices-demo
+      environment: minikube
+  
+  snippets:
+    pipelineStages:
+    - docker: {}
+    - json:
+        expressions:
+          level: severity
+          message: message
+          timestamp: timestamp
+    - labels:
+        level:
+    - timestamp:
+        source: timestamp
+        format: RFC3339Nano
+
+serviceMonitor:
+  enabled: true
+
+# Set env vars from secret
+env:
+- name: LOKI_USERNAME
+  valueFrom:
+    secretKeyRef:
+      name: grafana-cloud-credentials
+      key: loki-username
+- name: LOKI_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: grafana-cloud-credentials
+      key: loki-password
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi

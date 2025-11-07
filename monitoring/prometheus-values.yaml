@@ -1,0 +1,46 @@
+# Prometheus configuration for Grafana Cloud integration
+prometheus:
+  prometheusSpec:
+    remoteWrite:
+    - url: https://prometheus-prod-43-prod-ap-south-1.grafana.net/api/prom/push
+      basicAuth:
+        username:
+          name: grafana-cloud-credentials
+          key: username
+        password:
+          name: grafana-cloud-credentials
+          key: password
+      writeRelabelConfigs:
+      - sourceLabels: [__name__]
+        regex: 'up|container_.*|kube_.*|node_.*|http_.*|process_.*'
+        action: keep
+    
+    # Enable service monitors
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    
+    # Storage
+    retention: 2h
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 5Gi
+
+  # Enable node exporter
+  nodeExporter:
+    enabled: true
+
+  # Enable kube-state-metrics
+  kubeStateMetrics:
+    enabled: true
+
+# Grafana (we'll disable since using Cloud)
+grafana:
+  enabled: false
+
+# Alertmanager
+alertmanager:
+  enabled: false

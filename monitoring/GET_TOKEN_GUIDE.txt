@@ -1,0 +1,107 @@
+# ==========================================
+# GRAFANA CLOUD - TOKEN KAISE BANAYE
+# ==========================================
+
+## METHOD 1: Service Account Token (Recommended)
+## =============================================
+
+1. Yahan jao (Direct URL):
+   https://ayazzssaifi.grafana.net/org/serviceaccounts
+
+2. Click: "Add service account"
+   
+3. Fill details:
+   - Name: microservices-demo-monitoring
+   - Role: Editor (ya Viewer with specific permissions)
+
+4. Click: "Create"
+
+5. Ab "Add service account token" button dikhe ga
+   - Click karo
+   - Token name: monitoring-push
+   - Click: "Generate token"
+   
+6. TOKEN COPY KARO! (ek hi baar dikhega)
+
+
+## METHOD 2: Cloud Access Policy (Newer Method)
+## =============================================
+
+1. Yahan jao:
+   https://grafana.com/orgs/ayazzssaifi
+
+2. Ya Grafana Cloud portal:
+   - Top right corner: Click on your profile/org name
+   - Select "Cloud Portal" ya "Grafana.com"
+
+3. Access Policies section:
+   - Create access policy
+   - Name: microservices-demo
+   - Scopes: 
+     ✓ metrics:write
+     ✓ logs:write
+   - Create token under this policy
+
+
+## METHOD 3: API Keys (Legacy but works)
+## =====================================
+
+1. Direct URL:
+   https://ayazzssaifi.grafana.net/org/apikeys
+
+2. Click: "New API Key"
+
+3. Details:
+   - Key name: microservices-monitoring
+   - Role: Editor
+   - Time to live: 90 days (ya as needed)
+
+4. Click: "Add"
+
+5. COPY THE KEY!
+
+
+## ABHI KE LIYE QUICKEST WAY:
+## ===========================
+
+Browser mein yeh URLs try karo (ek ek karke):
+
+1. https://ayazzssaifi.grafana.net/org/apikeys
+   (API Keys - legacy but easiest)
+
+2. https://ayazzssaifi.grafana.net/org/serviceaccounts
+   (Service Accounts - recommended)
+
+3. https://grafana.com/orgs/ayazzssaifi/access-policies
+   (Cloud Access Policies - most secure)
+
+
+## TOKEN MILNE KE BAAD:
+## ====================
+
+File mein paste karo: monitoring/grafana-cloud-secret.yaml
+
+prometheus-password: "YOUR_TOKEN_HERE"
+loki-password: "YOUR_TOKEN_HERE"  # Same token
+
+
+## USERNAME KAHAN SE LAYE:
+## ========================
+
+1. Go to: https://ayazzssaifi.grafana.net/connections/datasources
+
+2. Click: "grafanacloud-ayazzssaifi-prom"
+
+3. Scroll to "Auth" section
+
+4. Copy the "User" field (ek number hoga, e.g., "784995")
+
+
+## IMPORTANT NOTES:
+## ================
+
+- Token sirf EK BAAR dikhta hai
+- Copy karke safe jagah rakh lo
+- Same token Prometheus aur Loki dono ke liye use kar sakte ho
+- Scopes: metrics:write, logs:write (dono chahiye)
+

@@ -1,0 +1,41 @@
+# Simplified Prometheus configuration
+prometheus:
+  prometheusSpec:
+    # Enable service monitors for all namespaces
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    
+    # Storage
+    retention: 6h
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 2Gi
+    
+    # Resources
+    resources:
+      requests:
+        cpu: 200m
+        memory: 400Mi
+      limits:
+        cpu: 500m
+        memory: 800Mi
+
+# Disable Grafana (using Cloud)
+grafana:
+  enabled: false
+
+# Disable Alertmanager
+alertmanager:
+  enabled: false
+
+# Enable node exporter
+prometheus-node-exporter:
+  enabled: true
+
+# Enable kube-state-metrics
+kube-state-metrics:
+  enabled: true

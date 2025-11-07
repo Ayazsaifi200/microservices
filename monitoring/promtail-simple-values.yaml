@@ -1,0 +1,26 @@
+# Promtail configuration for local collection
+config:
+  # We'll add Grafana Cloud URL later
+  clients:
+  - url: http://loki:3100/loki/api/v1/push
+  
+  snippets:
+    pipelineStages:
+    - docker: {}
+    - json:
+        expressions:
+          level: severity
+          message: message
+    - labels:
+        level:
+
+serviceMonitor:
+  enabled: true
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi

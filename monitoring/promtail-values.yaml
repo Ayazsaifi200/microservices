@@ -1,0 +1,64 @@
+# Promtail configuration for sending logs to Grafana Cloud Loki
+config:
+  clients:
+  - url: https://logs-prod-006.grafana.net/loki/api/v1/push
+    basic_auth:
+      username: ${LOKI_USERNAME}
+      password: ${LOKI_PASSWORD}
+    external_labels:
+      cluster: microservices-demo
+      environment: minikube
+  
+  snippets:
+    pipelineStages:
+    - docker: {}
+    - labeldrop:
+      - filename
+    - json:
+        expressions:
+          level: severity
+          message: message
+          timestamp: timestamp
+    - labels:
+        level:
+    - timestamp:
+        source: timestamp
+        format: RFC3339Nano
+
+  # Scrape configs
+  scrapeConfigs: |
+    - job_name: kubernetes-pods
+      kubernetes_sd_configs:
+        - role: pod
+      relabel_configs:
+        - source_labels:
+            - __meta_kubernetes_pod_controller_name
+          regex: ([0-9a-z-.]+?)(-[0-9a-f]{8,10})?
+          action: replace
+          target_label: __tmp_controller_name
+        - source_labels:
+            - __meta_kubernetes_pod_label_app
+            - __meta_kubernetes_pod_label_component
+          regex: ;
+          action: drop
+        - source_labels:
+            - __meta_kubernetes_pod_node_name
+          target_label: node_name
+        - source_labels:
+            - __meta_kubernetes_namespace
+          target_label: namespace
+        - source_labels:
+            - __meta_kubernetes_pod_name
+          target_label: pod
+        - source_labels:
+            - __meta_kubernetes_pod_container_name
+          target_label: container
+        - replacement: /var/log/pods/*$1/*.log
+          separator: /
+          source_labels:
+            - __meta_kubernetes_pod_uid
+            - __meta_kubernetes_pod_container_name
+          target_label: __path__
+
+serviceMonitor:
+  enabled: true

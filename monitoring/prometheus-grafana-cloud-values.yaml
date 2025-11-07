@@ -1,0 +1,70 @@
+# Prometheus with Grafana Cloud Remote Write
+prometheus:
+  prometheusSpec:
+    # Remote write to Grafana Cloud
+    remoteWrite:
+    - url: https://prometheus-prod-43-prod-ap-south-1.grafana.net/api/prom/push
+      basicAuth:
+        username:
+          name: grafana-cloud-credentials
+          key: prometheus-username
+        password:
+          name: grafana-cloud-credentials
+          key: prometheus-password
+      queueConfig:
+        capacity: 10000
+        maxShards: 50
+        minShards: 1
+        maxSamplesPerSend: 5000
+        batchSendDeadline: 5s
+        minBackoff: 30ms
+        maxBackoff: 100ms
+      writeRelabelConfigs:
+      # Keep important metrics only
+      - sourceLabels: [__name__]
+        regex: 'up|container_.*|kube_.*|node_.*|http_.*|process_.*|prometheus_.*'
+        action: keep
+      # Add cluster label
+      - targetLabel: cluster
+        replacement: 'microservices-demo'
+      - targetLabel: environment
+        replacement: 'minikube'
+    
+    # Enable service monitors
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    
+    # Storage
+    retention: 6h
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 2Gi
+    
+    # Resources
+    resources:
+      requests:
+        cpu: 200m
+        memory: 400Mi
+      limits:
+        cpu: 500m
+        memory: 800Mi
+
+# Grafana (disabled - using Cloud)
+grafana:
+  enabled: false
+
+# Alertmanager (disabled)
+alertmanager:
+  enabled: false
+
+# Enable node exporter
+prometheus-node-exporter:
+  enabled: true
+
+# Enable kube-state-metrics
+kube-state-metrics:
+  enabled: true
